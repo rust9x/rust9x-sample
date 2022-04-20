@@ -1,0 +1,31 @@
+[build]
+
+[target.'cfg(target_vendor = "rust9x")']
+rustflags = [
+  # Show linker args if needed
+  # '--print=link-args',
+
+  # statically linked runtime
+  '-Ctarget-feature=+crt-static',
+  # dynamically linked runtime
+  # '-Ctarget-feature=-crt-static',
+
+  # Add search paths
+  '-Clink-args=/LIBPATH:D:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\lib',
+  '-Clink-args=/LIBPATH:D:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\PlatformSDK\Lib',
+  # '-Clink-args=/LIBPATH:D:\rustprojs\rust9x\r9x-buildtools\vc8\VC\lib',
+  # '-Clink-args=/LIBPATH:D:\rustprojs\rust9x\r9x-buildtools\vc8\VC\PlatformSDK\Lib',
+
+  # (optional) Disable default libs for full control over linked libraries
+  # '-Clink-args=/NODEFAULTLIB',
+
+  # Remove default libs that unicows wraps/overrides
+  '-Clink-args=/nod:kernel32.lib /nod:advapi32.lib /nod:user32.lib /nod:gdi32.lib /nod:shell32.lib /nod:comdlg32.lib /nod:version.lib /nod:mpr.lib /nod:rasapi32.lib /nod:winmm.lib /nod:winspool.lib /nod:vfw32.lib /nod:secur32.lib /nod:oleacc.lib /nod:oledlg.lib /nod:sensapi.lib',
+
+  # Then link unicows itself, allowing the linker to resolve symbols to it instead of the wrapped
+  # libraries
+  '-Clink-arg=unicows.lib',
+
+  # Then add back the default libs that were removed
+  '-Clink-args=kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib',
+]
