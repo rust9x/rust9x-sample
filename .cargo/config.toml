@@ -11,10 +11,10 @@ rustflags = [
   # '-Ctarget-feature=-crt-static',
 
   # Add search paths
-  '-Clink-args=/LIBPATH:D:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\lib',
-  '-Clink-args=/LIBPATH:D:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\PlatformSDK\Lib',
-  # '-Clink-args=/LIBPATH:D:\rustprojs\rust9x\r9x-buildtools\vc8\VC\lib',
-  # '-Clink-args=/LIBPATH:D:\rustprojs\rust9x\r9x-buildtools\vc8\VC\PlatformSDK\Lib',
+  # '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\lib',
+  # '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\PlatformSDK\Lib',
+  '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\lib',
+  '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\PlatformSDK\Lib',
 
   # (optional) Disable default libs for full control over linked libraries
   # '-Clink-args=/NODEFAULTLIB',

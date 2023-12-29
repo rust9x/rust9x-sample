@@ -1,5 +1,9 @@
+use std::backtrace::Backtrace;
 use std::cell::RefCell;
-use std::io::{stdout, Read, Seek, SeekFrom, Write};
+#[cfg(feature = "network")]
+use std::io::Read;
+use std::io::{stdout, Seek, SeekFrom, Write};
+#[cfg(feature = "network")]
 use std::net::{TcpListener, ToSocketAddrs};
 use std::os::windows::fs::FileExt;
 use std::process::Command;
@@ -11,6 +15,7 @@ fn main() {
     test_home_dir();
     test_hashset_random_init();
     test_time();
+    test_backtrace();
 
     test_file_seek_truncate_append_fileext();
 
@@ -56,6 +61,12 @@ fn test_time() {
         Ok(d) => println!("  Duration since unix epoch: {}s", d.as_secs()),
         Err(_) => println!("  Duration since unix epoch: Error: SystemTime before UNIX EPOCH!"),
     }
+}
+
+#[inline(never)]
+fn test_backtrace() {
+    let backtrace = Backtrace::capture();
+    println!("Testing backtrace, might need RUST_BACKTRACE=1 or =full:\n{backtrace}");
 }
 
 fn test_file_seek_truncate_append_fileext() {
@@ -104,14 +115,29 @@ fn test_file_seek_truncate_append_fileext() {
     std::fs::remove_file("rust9x.txt").unwrap();
 }
 
-fn test_thread_locals() {
-    thread_local! {
-        static FOO: RefCell<u32> = RefCell::new(42);
-    }
+struct ThreadLocalPrintOnDrop {
+    val: u32,
+}
 
-    FOO.with(|n| *n.borrow_mut() = 43);
-    let j =
-        thread::spawn(|| FOO.with(|n| println!("thread local, this should be 42: {}", n.borrow())));
+impl Drop for ThreadLocalPrintOnDrop {
+    fn drop(&mut self) {
+        println!(
+            "Thread local dropped, if unchanged, this should be 42: {}",
+            self.val
+        );
+    }
+}
+
+thread_local! {
+    static FOO: RefCell<ThreadLocalPrintOnDrop> =
+        RefCell::new(ThreadLocalPrintOnDrop{ val: 42 });
+}
+
+fn test_thread_locals() {
+    let j = thread::spawn(|| {
+        FOO.with(|n| *n.borrow_mut() = ThreadLocalPrintOnDrop { val: 43 });
+        println!("set one thread's local to be 43, ending that thread now...");
+    });
 
     j.join().unwrap();
 }

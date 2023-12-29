@@ -2,8 +2,9 @@ set shell := ['powershell.exe', '-c']
 
 r9x_toolchain := 'rust9x'
 r9x_target := 'i586-rust9x-windows-msvc'
-r9x_editbin := 'C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.32.31326\bin\Hostx64\x64\editbin.exe'
+r9x_editbin := 'C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.39.33321\bin\Hostx64\x64\editbin.exe'
 
+# These settings shoud work for Windows 95+ and NT 3.51+.
 subsystem := 'CONSOLE,4.0'
 os_version := '3.1'
 
