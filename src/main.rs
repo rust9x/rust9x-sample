@@ -11,28 +11,66 @@ use std::sync::{Arc, Condvar, Mutex, RwLock};
 use std::thread;
 use std::time::{Duration, SystemTime};
 
+/// This needs to be set for libucrt to be able to do "dynamic" dispatch to optimized float
+/// intrinsics. We just hardcode it to 0 here - feel free to implement CPUID detection and set it to
+/// one of the following values:
+///
+/// __ISA_AVAILABLE_X86     equ 0
+/// __ISA_AVAILABLE_SSE2    equ 1
+/// __ISA_AVAILABLE_SSE42   equ 2
+/// __ISA_AVAILABLE_AVX     equ 3
+#[cfg(feature = "float")]
+#[unsafe(no_mangle)]
+#[used]
+#[allow(non_upper_case_globals)]
+pub static __isa_available: std::ffi::c_int = 0;
+
 fn main() {
-    test_home_dir();
-    test_hashset_random_init();
-    test_time();
-    test_backtrace();
-
-    test_file_seek_truncate_append_fileext();
-
-    test_process_stdio_redirect();
-
     test_thread_locals();
     test_mutex();
     test_rwlock();
     test_condvar();
 
+    test_stdout();
+
     test_panic_unwind();
+    test_backtrace();
+
+    test_time_and_sleep();
+    test_home_dir();
+    test_hashset_random_init();
+
+    test_file_seek_truncate_append_fileext();
+
+    test_process_stdio_redirect();
+
+    #[cfg(feature = "float")]
+    {
+        test_float_intrinsics();
+    }
+
+    #[cfg(feature = "stdin")]
+    {
+        test_stdin();
+    }
 
     #[cfg(feature = "network")]
     {
         test_sockaddr();
         test_tcp();
     }
+}
+
+fn test_stdout() {
+    println!("Testing UTF-8 console stdout fallback: ÄÖÜß, 你好，世界 🦀🦀");
+}
+
+#[cfg(feature = "stdin")]
+fn test_stdin() {
+    println!("input some string, enter to continue");
+    let mut buffer = String::new();
+    std::io::stdin().read_line(&mut buffer).unwrap();
+    println!("{}", buffer);
 }
 
 fn test_home_dir() {
@@ -54,13 +92,24 @@ fn test_hashset_random_init() {
     println!();
 }
 
-fn test_time() {
+fn test_time_and_sleep() {
     let now = SystemTime::now();
     println!("System time: {now:?}");
     match now.duration_since(SystemTime::UNIX_EPOCH) {
         Ok(d) => println!("  Duration since unix epoch: {}s", d.as_secs()),
         Err(_) => println!("  Duration since unix epoch: Error: SystemTime before UNIX EPOCH!"),
     }
+    println!("Testing sleep");
+    thread::sleep(Duration::from_millis(10));
+    thread::yield_now();
+    let now = SystemTime::now();
+    println!("System time: {now:?}");
+}
+
+#[cfg(feature = "float")]
+fn test_float_intrinsics() {
+    let a: f64 = 0.75;
+    println!("1: {}, 0: {}", a.round(), a.trunc());
 }
 
 #[inline(never)]
@@ -121,28 +170,28 @@ struct ThreadLocalPrintOnDrop {
 
 impl Drop for ThreadLocalPrintOnDrop {
     fn drop(&mut self) {
-        println!(
-            "Thread local dropped, if unchanged, this should be 42: {}",
-            self.val
-        );
+        println!("Thread local dropped, value: {}", self.val);
     }
 }
 
 thread_local! {
     static FOO: RefCell<ThreadLocalPrintOnDrop> =
-        RefCell::new(ThreadLocalPrintOnDrop{ val: 42 });
+        RefCell::new(ThreadLocalPrintOnDrop{ val: 0 });
 }
 
 fn test_thread_locals() {
-    let j = thread::spawn(|| {
-        FOO.with(|n| *n.borrow_mut() = ThreadLocalPrintOnDrop { val: 43 });
-        println!("set one thread's local to be 43, ending that thread now...");
+    let i = thread::spawn(|| {
+        FOO.with(|n| n.borrow_mut().val = 42);
+        println!(
+            "set one thread's local to be 42, ending that thread now. It should print the value..."
+        );
     });
 
-    j.join().unwrap();
+    i.join().unwrap();
 }
 
 fn test_process_stdio_redirect() {
+    println!(r"Running `hh3gf.golden.exe`, should print `Hello, World!\r\n`");
     let output = Command::new("./hh3gf.golden.exe")
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
@@ -150,8 +199,8 @@ fn test_process_stdio_redirect() {
         .unwrap();
 
     if let Ok(s) = std::str::from_utf8(&output.stdout) {
-        println!("Redirected stdout: {}", s);
-        println!("Redirected stderr len: {}", output.stderr.len());
+        println!("  Redirected stdout: {}", s);
+        println!("  Redirected stderr len: {}", output.stderr.len());
         assert_eq!(s, "Hello, World!\r\n");
     } else {
         panic!("Output was not valid utf8");
@@ -275,7 +324,7 @@ fn test_condvar() {
             while !*guard {
                 guard = cvar.wait(guard).unwrap();
             }
-            println!("    {} woke up", n);
+            println!("    {:2} woke up", n);
         }));
     }
 

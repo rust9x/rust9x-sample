@@ -6,17 +6,26 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
+default = ["stdin"]
+
 # Enables the sockaddr and TCP tests, which in turn add a static dependency on WinSock 2
 # (ws2_32.dll). This has to be turned off for Windows NT < 4.0, or for Windows 95 without installed
 # WinSock 2.
 network = []
+stdin = []
+float = []
 
 [dependencies]
+
+[profile.dev]
+# Unwind support needs at least VC8 (VS2005)
+# panic = "unwind"
+panic = "abort"
 
 [profile.release]
 lto = "thin"
 codegen-units = 1
 debug = 2
 # Unwind support needs at least VC8 (VS2005)
-panic = "unwind"
-# panic = "abort"
+# panic = "unwind"
+panic = "abort"

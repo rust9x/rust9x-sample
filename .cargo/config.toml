@@ -17,6 +17,7 @@ rustflags = [
   '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\PlatformSDK\Lib',
 
   # (optional) Disable default libs for full control over linked libraries
+  # Note that you'll need to add libcmt or msvcrt manually if you disable default libraries
   # '-Clink-args=/NODEFAULTLIB',
 
   # Remove default libs that unicows wraps/overrides
@@ -28,4 +29,8 @@ rustflags = [
 
   # Then add back the default libs that were removed
   '-Clink-args=kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib',
+
+  # Add modern universal CRT for missing float/math intrinsics. see `cfg(feature = "float")` in
+  # `main.rs`
+  # '-Clink-args=libucrt.lib',
 ]
