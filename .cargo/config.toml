@@ -2,7 +2,7 @@
 
 [target.'cfg(target_vendor = "rust9x")']
 rustflags = [
-  # Show linker args if needed
+  # Show linker args for debugging purposes
   # '--print=link-args',
 
   # statically linked runtime
@@ -10,11 +10,22 @@ rustflags = [
   # dynamically linked runtime
   # '-Ctarget-feature=-crt-static',
 
-  # Add search paths
+  # Add search paths for import libraries
+
+  # VC6 stdlib doesn't supoprt SAFESEH
+  # '-Clink-args=/SAFESEH:NO',
+  # '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\VS98_SP5\VC98\Lib',
+
+  # VC7.1: Win95 support, panic = "abort" mandatory, unwinding fails
   # '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\lib',
   # '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\PlatformSDK\Lib',
+
+  # VC8: Win98+ support, panic unwinding works
   '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\lib',
   '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\PlatformSDK\Lib',
+
+  # Any newer version of the toolsets should work just as well! Use e.g. the MSVC2017 XP toolset for
+  # the most modern XP support.
 
   # (optional) Disable default libs for full control over linked libraries
   # Note that you'll need to add libcmt or msvcrt manually if you disable default libraries

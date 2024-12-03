@@ -25,4 +25,4 @@ r9x $COMMAND *FLAGS:
 # setting the minimum required OS version. Both values must be in a supported range for the target
 # OS to accept and run the executable.
 editbin EXECUTABLE:
-    & "{{ r9x_editbin }}" {{ EXECUTABLE }} /SUBSYSTEM:{{ subsystem }} /OSVERSION:{{ os_version }} /RELEASE
+    & "{{ r9x_editbin }}" {{ EXECUTABLE }} /SUBSYSTEM:{{ subsystem }} /OSVERSION:{{ os_version }} /RELEASE /STACK:1048576
