@@ -23,7 +23,7 @@ float = []
 panic = "abort"
 
 [profile.release]
-lto = "thin"
+lto = true
 codegen-units = 1
 debug = 2
 # Unwind support needs at least VC8 (VS2005)

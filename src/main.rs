@@ -26,12 +26,11 @@ use std::time::{Duration, SystemTime};
 pub static __isa_available: std::ffi::c_int = 0;
 
 fn main() {
+    test_stdout();
     test_thread_locals();
     test_mutex();
     test_rwlock();
     test_condvar();
-
-    test_stdout();
 
     test_panic_unwind();
     test_backtrace();
@@ -41,6 +40,7 @@ fn main() {
     test_hashset_random_init();
 
     test_file_seek_truncate_append_fileext();
+    test_readdir();
 
     test_process_stdio_redirect();
 
@@ -58,6 +58,13 @@ fn main() {
     {
         test_sockaddr();
         test_tcp();
+    }
+}
+
+fn test_readdir() {
+    println!("Reading current directory:");
+    for entry in std::fs::read_dir(".").unwrap().flatten() {
+        println!("  - {}", entry.path().display());
     }
 }
 
