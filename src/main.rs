@@ -41,6 +41,7 @@ fn main() {
 
     test_file_seek_truncate_append_fileext();
     test_readdir();
+    test_delete_dir_all();
 
     test_process_stdio_redirect();
 
@@ -61,6 +62,7 @@ fn main() {
     }
 }
 
+#[inline(never)]
 fn test_readdir() {
     println!("Reading current directory:");
     for entry in std::fs::read_dir(".").unwrap().flatten() {
@@ -68,11 +70,34 @@ fn test_readdir() {
     }
 }
 
+#[inline(never)]
+fn test_delete_dir_all() {
+    let base_folder = r".\_r9xtmp";
+    let folder = &format!(r"{base_folder}\a\b\c");
+    std::fs::create_dir_all(folder).unwrap();
+
+    let mut file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(format!(r"{folder}\rust9x.txt"))
+        .unwrap();
+    file.write_all(b"Hello world!").unwrap();
+    file.flush().unwrap();
+    drop(file);
+
+    std::thread::sleep(Duration::from_millis(500));
+
+    std::fs::remove_dir_all(base_folder).unwrap();
+    assert!(!std::fs::exists(base_folder).unwrap());
+}
+
+#[inline(never)]
 fn test_stdout() {
     println!("Testing UTF-8 console stdout fallback: ÄÖÜß, 你好，世界 🦀🦀");
 }
 
 #[cfg(feature = "stdin")]
+#[inline(never)]
 fn test_stdin() {
     println!("input some string, enter to continue");
     let mut buffer = String::new();
@@ -80,12 +105,14 @@ fn test_stdin() {
     println!("{}", buffer);
 }
 
+#[inline(never)]
 fn test_home_dir() {
     #[allow(deprecated)]
     let home_dir = std::env::home_dir();
     println!("Home dir: {:?}", home_dir.as_ref().map(|p| p.display()));
 }
 
+#[inline(never)]
 fn test_hashset_random_init() {
     let mut set = std::collections::HashSet::with_capacity(16);
     for i in 0..16 {
@@ -99,6 +126,7 @@ fn test_hashset_random_init() {
     println!();
 }
 
+#[inline(never)]
 fn test_time_and_sleep() {
     let now = SystemTime::now();
     println!("System time: {now:?}");
@@ -114,6 +142,7 @@ fn test_time_and_sleep() {
 }
 
 #[cfg(feature = "float")]
+#[inline(never)]
 fn test_float_intrinsics() {
     let a: f64 = 0.75;
     println!("1: {}, 0: {}", a.round(), a.trunc());
@@ -125,10 +154,12 @@ fn test_backtrace() {
     println!("Testing backtrace, might need RUST_BACKTRACE=1 or =full:\n{backtrace}");
 }
 
+#[inline(never)]
 fn test_file_seek_truncate_append_fileext() {
     let mut file = std::fs::OpenOptions::new()
         .write(true)
         .create(true)
+        .truncate(true)
         .open("rust9x.txt")
         .unwrap();
 
@@ -182,10 +213,12 @@ impl Drop for ThreadLocalPrintOnDrop {
 }
 
 thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)]
     static FOO: RefCell<ThreadLocalPrintOnDrop> =
-        RefCell::new(ThreadLocalPrintOnDrop{ val: 0 });
+        RefCell::new(ThreadLocalPrintOnDrop { val: 0 });
 }
 
+#[inline(never)]
 fn test_thread_locals() {
     let i = thread::spawn(|| {
         FOO.with(|n| n.borrow_mut().val = 42);
@@ -197,6 +230,7 @@ fn test_thread_locals() {
     i.join().unwrap();
 }
 
+#[inline(never)]
 fn test_process_stdio_redirect() {
     println!(r"Running `hh3gf.golden.exe`, should print `Hello, World!\r\n`");
     let output = Command::new("./hh3gf.golden.exe")
@@ -214,6 +248,7 @@ fn test_process_stdio_redirect() {
     }
 }
 
+#[inline(never)]
 fn test_mutex() {
     let m = Arc::new(Mutex::new(5usize));
 
@@ -259,6 +294,7 @@ fn test_mutex() {
     println!("done ({:?})", *m.lock().unwrap());
 }
 
+#[inline(never)]
 fn test_rwlock() {
     let m = Arc::new(RwLock::new(5usize));
 
@@ -318,6 +354,7 @@ fn test_rwlock() {
     println!(" done ({:?})", *m.read().unwrap());
 }
 
+#[inline(never)]
 fn test_condvar() {
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
 
@@ -350,6 +387,7 @@ fn test_condvar() {
 }
 
 #[cfg(feature = "network")]
+#[inline(never)]
 fn test_sockaddr() {
     println!("Socket addr check for google.com:80:",);
     for addr in ("google.com", 80u16).to_socket_addrs().unwrap() {
@@ -358,6 +396,7 @@ fn test_sockaddr() {
 }
 
 #[cfg(feature = "network")]
+#[inline(never)]
 fn test_tcp() {
     println!("Tcp: starting server at 0.0.0.0:40004, CTRL+C to exit");
     let listener = TcpListener::bind("0.0.0.0:40004").unwrap();
@@ -402,11 +441,13 @@ fn test_tcp() {
 }
 
 #[cfg(panic = "abort")]
+#[inline(never)]
 fn test_panic_unwind() {
     // can't test unwinding without unwind
 }
 
 #[cfg(panic = "unwind")]
+#[inline(never)]
 fn test_panic_unwind() {
     fn inner() {
         panic!("woop");

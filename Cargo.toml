@@ -19,13 +19,13 @@ float = []
 
 [profile.dev]
 # Unwind support needs at least VC8 (VS2005)
-# panic = "unwind"
-panic = "abort"
+panic = "unwind"
+# panic = "abort"
 
 [profile.release]
 lto = true
 codegen-units = 1
 debug = 2
 # Unwind support needs at least VC8 (VS2005)
-# panic = "unwind"
-panic = "abort"
+panic = "unwind"
+# panic = "abort"
