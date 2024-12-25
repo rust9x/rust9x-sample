@@ -12,7 +12,7 @@ rustflags = [
 
   # Add search paths for import libraries
 
-  # VC6 stdlib doesn't supoprt SAFESEH
+  # VC6: Stdlib doesn't supoprt SAFESEH, panic = "abort" mandatory, unwinding fails
   # '-Clink-args=/SAFESEH:NO',
   # '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\VS98_SP5\VC98\Lib',
 
