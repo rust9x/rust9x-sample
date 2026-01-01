@@ -1,38 +1,65 @@
+[unstable]
+# using build-std will allow for smaller binaries (only include what you use)
+#
+# build-std = ["std"]
+
+# optimize_for_size replaces some size-expensive algorithms with smaller ones (sorting, int parsing,
+# ...)
+#
+# build-std-features = ["optimize_for_size"]
+
 [build]
 
-[target.'cfg(target_vendor = "rust9x")']
+[target.'cfg(target_family = "rust9x")']
+linker = "rust-lld.exe"
 rustflags = [
   # Show linker args for debugging purposes
   # '--print=link-args',
+
+  # IMPORTANT: the next two link args will ONLY work with rust-lld, not with a moder MSVC link.exe!
+  # if you can't use rust-lld for some reason, you'll need to add a post-compile step to use
+  # `editbin.exe` to set these instead: `editbin.exe /SUBSYSTEM:... /OSVERSION:...`
+  #
+  # set subsystem to WINDOWS or CONSOLE, with version 4.0 (Windows 95 and up)
+  '-Clink-arg=/SUBSYSTEM:CONSOLE,4.0',
+  # set os version to 3.1 to work anywhere
+  '-Clink-arg=/OSVERSION:3.1',
+
+  # 1MB stack
+  '-Clink-arg=/STACK:1048576',
 
   # statically linked runtime
   '-Ctarget-feature=+crt-static',
   # dynamically linked runtime
   # '-Ctarget-feature=-crt-static',
 
+  #
   # Add search paths for import libraries
+  #
 
-  # VC6: Stdlib doesn't supoprt SAFESEH, panic = "abort" mandatory, unwinding fails
-  # '-Clink-args=/SAFESEH:NO',
-  # '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\VS98_SP5\VC98\Lib',
+  # VC6: Stdlib doesn't support SAFESEH, panic = "abort" mandatory, unwinding fails
+  # '-Clink-arg=/SAFESEH:NO',
+  # '-Clink-arg=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\VS98_SP5\VC98\Lib',
 
   # VC7.1: Win95 support, panic = "abort" mandatory, unwinding fails
-  # '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\lib',
-  # '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\PlatformSDK\Lib',
+  # '-Clink-arg=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\lib',
+  # '-Clink-arg=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\PlatformSDK\Lib',
+  # # necessary for rust-lld, as it doesn't like the old pdb format used by VC7.1
+  # '-Clink-arg=/DEBUG:NONE',
 
   # VC8: Win98+ support, panic unwinding works
-  '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\lib',
-  '-Clink-args=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\PlatformSDK\Lib',
+  '-Clink-arg=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\lib',
+  '-Clink-arg=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\PlatformSDK\Lib',
 
   # Any newer version of the toolsets should work just as well! Use e.g. the MSVC2017 XP toolset for
   # the most modern XP support.
 
   # (optional) Disable default libs for full control over linked libraries
   # Note that you'll need to add libcmt or msvcrt manually if you disable default libraries
-  # '-Clink-args=/NODEFAULTLIB',
+  # '-Clink-arg=/NODEFAULTLIB',
 
   # Remove default libs that unicows wraps/overrides
-  '-Clink-args=/nod:kernel32.lib /nod:advapi32.lib /nod:user32.lib /nod:gdi32.lib /nod:shell32.lib /nod:comdlg32.lib /nod:version.lib /nod:mpr.lib /nod:rasapi32.lib /nod:winmm.lib /nod:winspool.lib /nod:vfw32.lib /nod:secur32.lib /nod:oleacc.lib /nod:oledlg.lib /nod:sensapi.lib',
+  '-Clink-args=/NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:advapi32.lib /NODEFAULTLIB:user32.lib /NODEFAULTLIB:gdi32.lib /NODEFAULTLIB:shell32.lib /NODEFAULTLIB:comdlg32.lib /NODEFAULTLIB:version.lib /NODEFAULTLIB:mpr.lib /NODEFAULTLIB:rasapi32.lib /NODEFAULTLIB:winmm.lib /NODEFAULTLIB:winspool.lib /NODEFAULTLIB:vfw32.lib /NODEFAULTLIB:secur32.lib /NODEFAULTLIB:oleacc.lib /NODEFAULTLIB:oledlg.lib /NODEFAULTLIB:sensapi.lib',
 
   # Then link unicows itself, allowing the linker to resolve symbols to it instead of the wrapped
   # libraries
@@ -42,6 +69,7 @@ rustflags = [
   '-Clink-args=kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib',
 
   # Add modern universal CRT for missing float/math intrinsics. see `cfg(feature = "float")` in
-  # `main.rs`
-  # '-Clink-args=libucrt.lib',
+  # `main.rs`!
+  #
+  # '-Clink-arg=libucrt.lib',
 ]

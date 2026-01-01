@@ -1,12 +1,12 @@
 [package]
 name = "rust9x_sample"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["stdin"]
+default = ["stdin", "network"]
 
 # Enables the sockaddr and TCP tests, which in turn add a static dependency on WinSock 2
 # (ws2_32.dll). This has to be turned off for Windows NT < 4.0, or for Windows 95 without installed
@@ -23,8 +23,9 @@ panic = "unwind"
 # panic = "abort"
 
 [profile.release]
-lto = true
-codegen-units = 1
+# enable these two for smaller binaries
+# lto = true
+# codegen-units = 1
 debug = 2
 # Unwind support needs at least VC8 (VS2005)
 panic = "unwind"

@@ -134,8 +134,8 @@ fn test_time_and_sleep() {
         Ok(d) => println!("  Duration since unix epoch: {}s", d.as_secs()),
         Err(_) => println!("  Duration since unix epoch: Error: SystemTime before UNIX EPOCH!"),
     }
-    println!("Testing sleep");
-    thread::sleep(Duration::from_millis(10));
+    println!("Testing sleep (1 second)");
+    thread::sleep(Duration::from_millis(1000));
     thread::yield_now();
     let now = SystemTime::now();
     println!("System time: {now:?}");
@@ -233,11 +233,12 @@ fn test_thread_locals() {
 #[inline(never)]
 fn test_process_stdio_redirect() {
     println!(r"Running `hh3gf.golden.exe`, should print `Hello, World!\r\n`");
-    let output = Command::new("./hh3gf.golden.exe")
+    let spawned = Command::new("./hh3gf.golden.exe")
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
-        .output()
+        .spawn()
         .unwrap();
+    let output = spawned.wait_with_output().unwrap();
 
     if let Ok(s) = std::str::from_utf8(&output.stdout) {
         println!("  Redirected stdout: {}", s);
