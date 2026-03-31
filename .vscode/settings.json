@@ -1,7 +1,14 @@
 {
   "rust-analyzer.cargo.features": "all",
-  "rust-analyzer.rustfmt.overrideCommand": [
-    "rustfmt",
-    "+nightly"
-  ]
+  "rust-analyzer.rustfmt.overrideCommand": ["rustfmt", "+nightly"],
+  "rust-analyzer.check.overrideCommand": [
+    "cargo",
+    "check",
+    "--workspace",
+    "--message-format=json",
+    "--target",
+    "i586-rust9x-windows-msvc"
+  ],
+  "rust-analyzer.cargo.target": "i586-rust9x-windows-msvc",
+  "rust-analyzer.cargo.noDeps": false
 }
