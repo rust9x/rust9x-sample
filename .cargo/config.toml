@@ -10,7 +10,7 @@
 
 [build]
 
-[target.'cfg(target_family = "rust9x")']
+[target.'cfg(all(target_family = "rust9x", target_env = "msvc"))']
 linker = "rust-lld.exe"
 rustflags = [
   # Show linker args for debugging purposes
