@@ -10,6 +10,9 @@
 
 [build]
 
+[target.'cfg(all(target_env = "msvc"))']
+linker = "rust-lld"
+
 [target.'cfg(all(target_family = "rust9x", target_env = "msvc"))']
 rustflags = [
   # Show linker args for debugging purposes
@@ -28,9 +31,9 @@ rustflags = [
   '-Clink-arg=/STACK:1048576',
 
   # statically linked runtime
-  '-Ctarget-feature=+crt-static',
+  # '-Ctarget-feature=+crt-static',
   # dynamically linked runtime
-  # '-Ctarget-feature=-crt-static',
+  '-Ctarget-feature=-crt-static',
 
   #
   # Add search paths for import libraries
@@ -38,20 +41,22 @@ rustflags = [
 
   # VC6: Stdlib doesn't support SAFESEH, panic = "abort" mandatory, unwinding fails
   # '-Clink-arg=/SAFESEH:NO',
-  # '-Clink-arg=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\VS98_SP5\VC98\Lib',
+  # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc6/VC98/Lib/',
 
   # VC7.1: Win95 support, panic = "abort" mandatory, unwinding fails
-  # '-Clink-arg=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\lib',
-  # '-Clink-arg=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc71\Vc7\PlatformSDK\Lib',
-  # # necessary for rust-lld, as it doesn't like the old pdb format used by VC7.1
+  # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc71/Vc7/lib',
+  # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc71/Vc7/PlatformSDK/Lib/',
+  # necessary for rust-lld, as it doesn't like the old pdb format used by VC7.1
   # '-Clink-arg=/DEBUG:NONE',
 
-  # VC8: Win98+ support, panic unwinding works
-  '-Clink-arg=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\lib',
-  '-Clink-arg=/LIBPATH:X:\rustprojs\rust9x\r9x-buildtools\vc8\VC\PlatformSDK\Lib',
+  # VC8: Win98+/NT4 support, panic unwinding works
+  '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc8/VC/lib',
+  '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc8/VC/PlatformSDK/Lib',
 
   # Any newer version of the toolsets should work just as well! Use e.g. the MSVC2017 XP toolset for
   # the most modern XP support.
+  # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vs2022-2017-xp/BuildTools/VC/Tools/MSVC/14.16.27023/lib/x86',
+  # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vs2022-2017-xp/Microsoft SDKs/Windows/v7.1A/Lib',
 
   # (optional) Disable default libs for full control over linked libraries
   # Note that you'll need to add libcmt or msvcrt manually if you disable default libraries
