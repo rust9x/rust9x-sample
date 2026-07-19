@@ -5,6 +5,7 @@ use std::io::Read;
 use std::io::{stdout, Seek, SeekFrom, Write};
 #[cfg(feature = "network")]
 use std::net::{TcpListener, ToSocketAddrs};
+#[cfg(windows)]
 use std::os::windows::fs::FileExt;
 use std::process::Command;
 use std::sync::{Arc, Condvar, Mutex, RwLock};
@@ -43,6 +44,7 @@ fn main() {
     test_readdir();
     test_delete_dir_all();
 
+    #[cfg(windows)]
     test_process_stdio_redirect();
 
     #[cfg(feature = "float")]
@@ -66,20 +68,36 @@ fn main() {
 fn test_readdir() {
     println!("Reading current directory:");
     for entry in std::fs::read_dir(".").unwrap().flatten() {
-        println!("  - {}", entry.path().display());
+        print!("  - {}", entry.path().display());
+        match entry.file_type().map(|t| t.is_file()) {
+            Ok(true) => {
+                if let Ok(len) = entry.metadata().map(|m| m.len()) {
+                    print!(" ({len} bytes)");
+                } else {
+                    print!(" (<unk> bytes)");
+                }
+            }
+            Ok(false) => {
+                print!(" (dir)");
+            }
+            Err(_) => {
+                print!(" (<unk>)");
+            }
+        }
+        println!();
     }
 }
 
 #[inline(never)]
 fn test_delete_dir_all() {
-    let base_folder = r".\_r9xtmp";
-    let folder = &format!(r"{base_folder}\a\b\c");
+    let base_folder = r"./_r9xtmp";
+    let folder = &format!(r"{base_folder}/a/b/c");
     std::fs::create_dir_all(folder).unwrap();
 
     let mut file = std::fs::OpenOptions::new()
         .write(true)
         .create_new(true)
-        .open(format!(r"{folder}\rust9x.txt"))
+        .open(format!(r"{folder}/rust9x.txt"))
         .unwrap();
     file.write_all(b"Hello world!").unwrap();
     file.flush().unwrap();
@@ -181,7 +199,15 @@ fn test_file_seek_truncate_append_fileext() {
         .unwrap();
 
     // just assuming that the whole buffer gets written in this case
-    file.seek_write(b"Hello", 0).unwrap();
+    cfg_select! {
+        windows => {
+            file.seek_write(b"Hello", 0).unwrap();
+        }
+        _ => {
+            file.seek(SeekFrom::Start(0)).unwrap();
+            file.write_all(b"Hello").unwrap();
+        }
+    }
     file.flush().unwrap();
     drop(file);
 
@@ -230,6 +256,7 @@ fn test_thread_locals() {
     i.join().unwrap();
 }
 
+#[cfg(windows)]
 #[inline(never)]
 fn test_process_stdio_redirect() {
     println!(r"Running `hh3gf.golden.exe`, should print `Hello, World!\r\n`");
