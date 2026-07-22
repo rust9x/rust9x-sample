@@ -18,8 +18,7 @@ float = []
 [dependencies]
 
 [profile.dev]
-# Unwind support needs at least VC8 (VS2005)
-panic = "unwind"
+panic = "unwind" # Unwind support needs at least VC8 (VS2005)
 # panic = "abort"
 
 [profile.release]
@@ -27,6 +26,5 @@ panic = "unwind"
 # lto = true
 # codegen-units = 1
 debug = 2
-# Unwind support needs at least VC8 (VS2005)
-panic = "unwind"
+panic = "unwind" # Unwind support needs at least VC8 (VS2005)
 # panic = "abort"

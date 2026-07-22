@@ -22,44 +22,39 @@ rustflags = [
   # if you can't use rust-lld for some reason, you'll need to add a post-compile step to use
   # `editbin.exe` to set these instead: `editbin.exe /SUBSYSTEM:... /OSVERSION:...`
   #
-  # set subsystem to WINDOWS or CONSOLE, with version 4.0 (Windows 95 and up)
+  # set subsystem to WINDOWS or CONSOLE, with version 4.0 (Windows 95 and up, NT3.51 and up)
   '-Clink-arg=/SUBSYSTEM:CONSOLE,4.0',
-  # set os version to 3.1 to work anywhere
-  '-Clink-arg=/OSVERSION:3.1',
+  '-Clink-arg=/OSVERSION:3.1',         # set OS version to 3.1 to work anywhere
 
-  # 1MB stack
-  '-Clink-arg=/STACK:1048576',
+  # (NOTE: NT3.51 does _not_ like a 1MiB stack and will promptly ignore it)
+  '-Clink-arg=/STACK:131072', # 128KiB stack
 
-  # statically linked runtime
-  # '-Ctarget-feature=+crt-static',
-  # dynamically linked runtime
-  '-Ctarget-feature=-crt-static',
+  '-Ctarget-feature=+crt-static', # statically linked runtime
+  # '-Ctarget-feature=-crt-static', # dynamically linked runtime
 
-  #
   # Add search paths for import libraries
-  #
 
-  # VC6: Stdlib doesn't support SAFESEH, panic = "abort" mandatory, unwinding fails
+  # # VC6: Stdlib doesn't support SAFESEH, panic = "abort" mandatory, unwinding fails
   # '-Clink-arg=/SAFESEH:NO',
-  # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc6/VC98/Lib/',
+  # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc6/VC98/Lib',
 
-  # VC7.1: Win95 support, panic = "abort" mandatory, unwinding fails
+  # # VC7.1: Win95 support, panic = "abort" mandatory, unwinding fails
   # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc71/Vc7/lib',
-  # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc71/Vc7/PlatformSDK/Lib/',
-  # necessary for rust-lld, as it doesn't like the old pdb format used by VC7.1
+  # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc71/Vc7/PlatformSDK/Lib',
+  # # necessary for rust-lld, as it doesn't like the old pdb format used by VC7.1
   # '-Clink-arg=/DEBUG:NONE',
 
   # VC8: Win98+/NT4 support, panic unwinding works
   '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc8/VC/lib',
   '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vc8/VC/PlatformSDK/Lib',
 
-  # Any newer version of the toolsets should work just as well! Use e.g. the MSVC2017 XP toolset for
-  # the most modern XP support.
+  # # Any newer version of the toolsets should work just as well! Use e.g. the MSVC2017 XP toolset
+  # # for the most modern XP support.
   # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vs2022-2017-xp/BuildTools/VC/Tools/MSVC/14.16.27023/lib/x86',
   # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vs2022-2017-xp/Microsoft SDKs/Windows/v7.1A/Lib',
 
-  # (optional) Disable default libs for full control over linked libraries
-  # Note that you'll need to add libcmt or msvcrt manually if you disable default libraries
+  # # (optional) Disable default libs for full control over linked libraries
+  # # Note that you'll need to add libcmt or msvcrt manually if you disable default libraries
   # '-Clink-arg=/NODEFAULTLIB',
 
   # Remove default libs that unicows wraps/overrides
@@ -72,8 +67,7 @@ rustflags = [
   # Then add back the default libs that were removed
   '-Clink-args=kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib',
 
-  # Add modern universal CRT for missing float/math intrinsics. see `cfg(feature = "float")` in
-  # `main.rs`!
-  #
+  # # Add modern universal CRT for missing float/math intrinsics. see `cfg(feature = "float")` in
+  # # `main.rs`!
   # '-Clink-arg=libucrt.lib',
 ]
