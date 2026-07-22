@@ -22,7 +22,8 @@ rustflags = [
   # if you can't use rust-lld for some reason, you'll need to add a post-compile step to use
   # `editbin.exe` to set these instead: `editbin.exe /SUBSYSTEM:... /OSVERSION:...`
   #
-  # set subsystem to WINDOWS or CONSOLE, with version 4.0 (Windows 95 and up, NT3.51 and up)
+  # set subsystem to WINDOWS or CONSOLE, with version 4.0 (Windows 95 and up, NT3.5 and up)
+  # set version 3.10 (_not_ 3.1) for Windows NT 3.1
   '-Clink-arg=/SUBSYSTEM:CONSOLE,4.0',
   '-Clink-arg=/OSVERSION:3.1',         # set OS version to 3.1 to work anywhere
 
