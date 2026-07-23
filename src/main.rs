@@ -259,8 +259,8 @@ fn test_thread_locals() {
 #[cfg(windows)]
 #[inline(never)]
 fn test_process_stdio_redirect() {
-    println!(r"Running `hh3gf.golden.exe`, should print `Hello, World!\r\n`");
-    let spawned = Command::new("./hh3gf.golden.exe")
+    println!(r"Running `hello.exe`, should print `Hello, World!\r\n`");
+    let spawned = Command::new("./hello.exe")
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn()

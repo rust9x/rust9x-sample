@@ -5,11 +5,7 @@
    comment them out.
 2. `cargo +rust9x build --target i686-rust9x-windows-pc` or equivalent
 
-- Make sure to put `hh3gf.golden.exe` next to the executable for testing.
+- Make sure to put `hello.exe` next to the executable for testing.
 - If you plan on testing on Windows 9x/ME, make sure to place `unicows.dll` next to the executable
   - For stack unwinding, also place `dbghelp.dll` (version 5.1 or higher, see r9x wiki for more info)
 - If you link dynamically, make sure to provide the necessary runtime libraries.
-
-## Credits
-
-`hh3gf.golden.exe` is taken from https://github.com/pts/pts-tinype to test stdout redirection.
