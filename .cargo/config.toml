@@ -3,24 +3,27 @@
 #
 # build-std = ["std"]
 
-# optimize_for_size replaces some size-expensive algorithms with smaller ones (sorting, int parsing,
+# `optimize_for_size` replaces some size-expensive algorithms with smaller ones (sorting, int parsing,
 # ...)
 #
-# build-std-features = ["optimize_for_size"]
+# build-std-features = ["backtrace", "optimize_for_size"]
 
 [build]
 
 [target.'cfg(all(target_env = "msvc"))']
 linker = "rust-lld"
+# you might want this if you're building on linux
+# runner = "wine"
 
 [target.'cfg(all(target_family = "rust9x", target_env = "msvc"))']
 rustflags = [
   # Show linker args for debugging purposes
   # '--print=link-args',
 
-  # IMPORTANT: the next two link args will ONLY work with rust-lld, not with a moder MSVC link.exe!
+  # IMPORTANT: the next two link args will ONLY work with rust-lld, not with a modern MSVC link.exe!
   # if you can't use rust-lld for some reason, you'll need to add a post-compile step to use
   # `editbin.exe` to set these instead: `editbin.exe /SUBSYSTEM:... /OSVERSION:...`
+  # editbin will warn, but still do it.
   #
   # set subsystem to WINDOWS or CONSOLE, with version 4.0 (Windows 95 and up, NT3.5 and up)
   # set version 3.10 (_not_ 3.1) for Windows NT 3.1
@@ -33,7 +36,16 @@ rustflags = [
   '-Ctarget-feature=+crt-static', # statically linked runtime
   # '-Ctarget-feature=-crt-static', # dynamically linked runtime
 
-  # Add search paths for import libraries
+  ############# Add search paths for import libraries
+
+  # rust9x links against `unicows.lib` by default, make sure it's in your search path.
+  '-Clink-arg=/home/seri/mnt/ext4/msvc-toolchains/platformsdk3790/Lib/unicows.lib',
+  # If you don't want to use `unicows.lib` (you're not targeting Windows 9x/Me), you can disable it:
+  # '-Zunicows=no',
+
+  # # r9xrsrt: all windows, no C support, no unwinding, no float math library
+  # '-Clink-arg=/LIBPATH:/home/seri/p/rust/rust9x/r9xrsrt/target/i586-rust9x-windows-msvc/release',
+  # '-Clink-arg=kernel32.lib',
 
   # # VC6: Stdlib doesn't support SAFESEH, panic = "abort" mandatory, unwinding fails
   # '-Clink-arg=/SAFESEH:NO',
@@ -53,20 +65,6 @@ rustflags = [
   # # for the most modern XP support.
   # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vs2022-2017-xp/BuildTools/VC/Tools/MSVC/14.16.27023/lib/x86',
   # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vs2022-2017-xp/Microsoft SDKs/Windows/v7.1A/Lib',
-
-  # # (optional) Disable default libs for full control over linked libraries
-  # # Note that you'll need to add libcmt or msvcrt manually if you disable default libraries
-  # '-Clink-arg=/NODEFAULTLIB',
-
-  # Remove default libs that unicows wraps/overrides
-  '-Clink-args=/NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:advapi32.lib /NODEFAULTLIB:user32.lib /NODEFAULTLIB:gdi32.lib /NODEFAULTLIB:shell32.lib /NODEFAULTLIB:comdlg32.lib /NODEFAULTLIB:version.lib /NODEFAULTLIB:mpr.lib /NODEFAULTLIB:rasapi32.lib /NODEFAULTLIB:winmm.lib /NODEFAULTLIB:winspool.lib /NODEFAULTLIB:vfw32.lib /NODEFAULTLIB:secur32.lib /NODEFAULTLIB:oleacc.lib /NODEFAULTLIB:oledlg.lib /NODEFAULTLIB:sensapi.lib',
-
-  # Then link unicows itself, allowing the linker to resolve symbols to it instead of the wrapped
-  # libraries
-  '-Clink-arg=unicows.lib',
-
-  # Then add back the default libs that were removed
-  '-Clink-args=kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib',
 
   # # Add modern universal CRT for missing float/math intrinsics. see `cfg(feature = "float")` in
   # # `main.rs`!
