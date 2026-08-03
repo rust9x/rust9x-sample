@@ -1,12 +1,12 @@
 [unstable]
 # using build-std will allow for smaller binaries (only include what you use)
 #
-# build-std = ["std"]
+build-std = ["std"]
 
 # `optimize_for_size` replaces some size-expensive algorithms with smaller ones (sorting, int parsing,
 # ...)
 #
-# build-std-features = ["backtrace", "optimize_for_size"]
+build-std-features = ["backtrace", "optimize_for_size"]
 
 [build]
 
@@ -39,13 +39,12 @@ rustflags = [
   ############# Add search paths for import libraries
 
   # rust9x links against `unicows.lib` by default, make sure it's in your search path.
-  '-Clink-arg=/home/seri/mnt/ext4/msvc-toolchains/platformsdk3790/Lib/unicows.lib',
+  '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/platformsdk3790/Lib',
   # If you don't want to use `unicows.lib` (you're not targeting Windows 9x/Me), you can disable it:
   # '-Zunicows=no',
 
   # # r9xrsrt: all windows, no C support, no unwinding, no float math library
-  # '-Clink-arg=/LIBPATH:/home/seri/p/rust/rust9x/r9xrsrt/target/i586-rust9x-windows-msvc/release',
-  # '-Clink-arg=kernel32.lib',
+  # '-Clink-arg=/LIBPATH:/home/seri/p/rust/rust9x/r9xrsrt/target/i486-rust9x-windows-msvc/release',
 
   # # VC6: Stdlib doesn't support SAFESEH, panic = "abort" mandatory, unwinding fails
   # '-Clink-arg=/SAFESEH:NO',
@@ -68,5 +67,6 @@ rustflags = [
 
   # # Add modern universal CRT for missing float/math intrinsics. see `cfg(feature = "float")` in
   # # `main.rs`!
+  # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vs2022-2017-xp/Windows Kits/10/Lib/10.0.10240.0/ucrt/x86/',
   # '-Clink-arg=libucrt.lib',
 ]
