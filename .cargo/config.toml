@@ -1,7 +1,7 @@
 [unstable]
 # using build-std will allow for smaller binaries (only include what you use)
 #
-build-std = ["std"]
+build-std = ["std", "panic_abort"]
 
 # `optimize_for_size` replaces some size-expensive algorithms with smaller ones (sorting, int parsing,
 # ...)
