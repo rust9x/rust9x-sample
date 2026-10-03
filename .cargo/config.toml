@@ -69,4 +69,7 @@ rustflags = [
   # # `main.rs`!
   # '-Clink-arg=/LIBPATH:/home/seri/mnt/ext4/msvc-toolchains/vs2022-2017-xp/Windows Kits/10/Lib/10.0.10240.0/ucrt/x86/',
   # '-Clink-arg=libucrt.lib',
+
+  # might be necessary for debug/opt-level 0 builds, depending on your selected toolchain
+  # '-Clink-arg=/force:unresolved',
 ]
